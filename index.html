@@ -2,284 +2,293 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Captura de Datos</title>
+  <!-- Fuentes de Google para un aspecto más moderno -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #999; padding: 6px 12px; }
-    th { background: #eee; }
-    #seccionTabla { display: none; }
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-color);
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="email"] {
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #btnRegistrar {
+      background-color: var(--primary);
+      color: white;
+    }
+    #btnRegistrar:hover:not(:disabled) { background-color: var(--primary-hover); }
+
+    #btnConsultar {
+      background-color: #0ea5e9;
+      color: white;
+    }
+    #btnConsultar:hover:not(:disabled) { background-color: #0284c7; }
+
+    #btnModificar {
+      background-color: #f59e0b;
+      color: white;
+    }
+    #btnModificar:hover:not(:disabled) { background-color: #d97706; }
+
+    #btnEliminar {
+      background-color: var(--danger);
+      color: white;
+    }
+    #btnEliminar:hover:not(:disabled) { background-color: var(--danger-hover); }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    #estado {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--primary);
+      min-height: 20px;
+    }
+
+    #seccionTabla {
+      display: none;
+      width: 100%;
+      max-width: 1000px;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    .table-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    #btnCerrar {
+      background-color: #e2e8f0;
+      color: #475569;
+    }
+    #btnCerrar:hover { background-color: #cbd5e1; }
+
+    #buscador {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      outline: none;
+    }
+    #buscador:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    td button {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      margin-right: 6px;
+    }
+
+    td button:first-child {
+      background-color: #0ea5e9;
+      color: white;
+    }
+    td button:first-child:hover { background-color: #0284c7; }
+
+    td button:last-child {
+      background-color: var(--danger);
+      color: white;
+    }
+    td button:last-child:hover { background-color: var(--danger-hover); }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <h2>Captura de Datos</h2>
+  <div class="container">
+    <h2>Captura de Datos</h2>
 
-  <form id="formulario">
-    <input type="hidden" id="id">
+    <form id="formulario">
+      <input type="hidden" id="id">
 
-    <label for="nombre">Nombre:</label><br>
-    <input type="text" id="nombre" required><br><br>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="nombre">Nombre:</label>
+          <input type="text" id="nombre" required placeholder="Ej. Juan Pérez">
+        </div>
 
-    <label for="edad">Edad:</label><br>
-    <input type="number" id="edad" required min="1" max="120"><br><br>
+        <div class="form-group">
+          <label for="edad">Edad:</label>
+          <input type="number" id="edad" required min="1" max="120" placeholder="Ej. 30">
+        </div>
 
-    <label for="cargo">Cargo:</label><br>
-    <input type="text" id="cargo" required><br><br>
+        <div class="form-group">
+          <label for="cargo">Cargo:</label>
+          <input type="text" id="cargo" required placeholder="Ej. Desarrollador">
+        </div>
 
-    <label for="telefono">Teléfono:</label><br>
-    <input type="tel" id="telefono" required><br><br>
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" required placeholder="Ej. 5512345678">
+        </div>
 
-    <label for="correo">Correo:</label><br>
-    <input type="email" id="correo" required><br><br>
+        <div class="form-group">
+          <label for="correo">Correo:</label>
+          <input type="email" id="correo" required placeholder="ejemplo@correo.com">
+        </div>
+      </div>
 
-    <button type="button" id="btnRegistrar">Registrar</button>
-    <button type="button" id="btnConsultar">Consultar</button>
-    <button type="button" id="btnModificar">Modificar</button>
-    <button type="button" id="btnEliminar">Eliminar</button>
-  </form>
+      <div class="button-group">
+        <button type="button" id="btnRegistrar">Registrar</button>
+        <button type="button" id="btnConsultar">Consultar</button>
+        <button type="button" id="btnModificar">Modificar</button>
+        <button type="button" id="btnEliminar">Eliminar</button>
+      </div>
+    </form>
 
-  <p id="estado"></p>
-
-  <div id="seccionTabla">
-    <h2>Registros</h2>
-    <button type="button" id="btnCerrar">Cerrar tabla</button>
-    <br><br>
-    <input type="text" id="buscador" placeholder="Buscar por nombre...">
-
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Nombre</th>
-          <th>Edad</th>
-          <th>Cargo</th>
-          <th>Teléfono</th>
-          <th>Correo</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tabla"></tbody>
-    </table>
+    <p id="estado"></p>
   </div>
-
-  <script>
-    // URL de la implementación de Apps Script
-    var URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzG7OUuyaCmAqz9AN0TuKVBdv0ltqhf6awzIRmA2DDLloz6yTvGytn6GMFWwYUohwI1xw/exec";
-
-    var registros = [];
-    var tablaVisible = false;
-
-    // ---------- Enviar datos al script ----------
-    function enviar(datos) {
-      return fetch(URL_SCRIPT, {
-        method: "POST",
-        body: new URLSearchParams(datos)
-      }).then(function (r) {
-        return r.json();
-      });
-    }
-
-    // ---------- Botones activos según el estado ----------
-    function actualizarBotones() {
-      var hayRegistro = document.getElementById("id").value !== "";
-
-      document.getElementById("btnRegistrar").disabled = hayRegistro;
-      document.getElementById("btnModificar").disabled = !hayRegistro;
-      document.getElementById("btnEliminar").disabled = !hayRegistro;
-    }
-
-    function limpiarFormulario() {
-      document.getElementById("formulario").reset();
-      document.getElementById("id").value = "";
-      actualizarBotones();
-    }
-
-    // ---------- REGISTRAR ----------
-    document.getElementById("btnRegistrar").onclick = function () {
-      if (!document.getElementById("formulario").reportValidity()) return;
-
-      document.getElementById("estado").textContent = "Guardando...";
-
-      enviar({
-        accion: "guardar",
-        nombre: document.getElementById("nombre").value,
-        edad: document.getElementById("edad").value,
-        cargo: document.getElementById("cargo").value,
-        telefono: document.getElementById("telefono").value,
-        correo: document.getElementById("correo").value
-      }).then(function (respuesta) {
-        terminarAccion(respuesta, "¡Registro guardado!");
-      });
-    };
-
-    // ---------- CONSULTAR ----------
-    document.getElementById("btnConsultar").onclick = function () {
-      document.getElementById("estado").textContent = "Consultando...";
-      tablaVisible = true;
-      document.getElementById("seccionTabla").style.display = "block";
-
-      cargarRegistros(function () {
-        document.getElementById("estado").textContent = "";
-      });
-    };
-
-    function cargarRegistros(alTerminar) {
-      fetch(URL_SCRIPT)
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (datos) {
-          registros = datos;
-          mostrarTabla();
-
-          if (alTerminar) alTerminar();
-        })
-        .catch(function (error) {
-          document.getElementById("estado").textContent =
-            "Error al consultar: " + error;
-        });
-    }
-
-    function mostrarTabla() {
-      var filtro = document.getElementById("buscador").value
-        .trim().toLowerCase();
-
-      var tabla = document.getElementById("tabla");
-      tabla.innerHTML = "";
-
-      registros.forEach(function (reg) {
-        if (!String(reg.nombre).toLowerCase().startsWith(filtro)) return;
-
-        var tr = document.createElement("tr");
-
-        agregarCelda(tr, new Date(reg.fecha).toLocaleString());
-        agregarCelda(tr, reg.nombre);
-        agregarCelda(tr, reg.edad);
-        agregarCelda(tr, reg.cargo);
-        agregarCelda(tr, reg.telefono);
-        agregarCelda(tr, reg.correo);
-
-        var td = document.createElement("td");
-
-        var btnModificarFila = document.createElement("button");
-        btnModificarFila.textContent = "Modificar registro";
-        btnModificarFila.onclick = function () {
-          cargarEnFormulario(reg);
-        };
-
-        var btnEliminarFila = document.createElement("button");
-        btnEliminarFila.textContent = "Eliminar";
-        btnEliminarFila.onclick = function () {
-          eliminar(reg.id);
-        };
-
-        td.appendChild(btnModificarFila);
-        td.appendChild(btnEliminarFila);
-        tr.appendChild(td);
-        tabla.appendChild(tr);
-      });
-    }
-
-    function agregarCelda(fila, texto) {
-      var td = document.createElement("td");
-      td.textContent = texto == null ? "" : texto;
-      fila.appendChild(td);
-    }
-
-    document.getElementById("buscador").oninput = mostrarTabla;
-
-    // ---------- CERRAR TABLA ----------
-    document.getElementById("btnCerrar").onclick = function () {
-      tablaVisible = false;
-      document.getElementById("seccionTabla").style.display = "none";
-      document.getElementById("buscador").value = "";
-      document.getElementById("tabla").innerHTML = "";
-    };
-
-    // ---------- CARGAR REGISTRO EN EL FORMULARIO ----------
-    function cargarEnFormulario(reg) {
-      document.getElementById("id").value = reg.id;
-      document.getElementById("nombre").value = reg.nombre;
-      document.getElementById("edad").value = reg.edad;
-      document.getElementById("cargo").value = reg.cargo;
-      document.getElementById("telefono").value = reg.telefono;
-      document.getElementById("correo").value = reg.correo;
-
-      document.getElementById("estado").textContent =
-        "Modificando registro: cambia los datos y presiona Modificar";
-
-      actualizarBotones();
-
-      window.scrollTo(0, 0);
-      document.getElementById("nombre").focus();
-    }
-
-    // ---------- MODIFICAR ----------
-    document.getElementById("btnModificar").onclick = function () {
-      var id = document.getElementById("id").value;
-
-      if (id === "") {
-        alert("Primero elige un registro con el botón 'Modificar registro'");
-        return;
-      }
-
-      if (!document.getElementById("formulario").reportValidity()) return;
-
-      document.getElementById("estado").textContent = "Modificando...";
-
-      enviar({
-        accion: "editar",
-        id: id,
-        nombre: document.getElementById("nombre").value,
-        edad: document.getElementById("edad").value,
-        cargo: document.getElementById("cargo").value,
-        telefono: document.getElementById("telefono").value,
-        correo: document.getElementById("correo").value
-      }).then(function (respuesta) {
-        terminarAccion(respuesta, "¡Registro modificado!");
-      });
-    };
-
-    // ---------- ELIMINAR ----------
-    document.getElementById("btnEliminar").onclick = function () {
-      var id = document.getElementById("id").value;
-
-      if (id === "") {
-        alert("Primero selecciona un registro.");
-        return;
-      }
-
-      eliminar(id);
-    };
-
-    function eliminar(id) {
-      if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
-
-      document.getElementById("estado").textContent = "Eliminando...";
-
-      enviar({
-        accion: "eliminar",
-        id: id
-      }).then(function (respuesta) {
-        terminarAccion(respuesta, "Registro eliminado");
-      });
-    }
-
-    // ---------- MENSAJE AL TERMINAR UNA ACCIÓN ----------
-    function terminarAccion(respuesta, mensajeOk) {
-      document.getElementById("estado").textContent =
-        respuesta.ok ? mensajeOk : "Error: " + respuesta.mensaje;
-
-      if (respuesta.ok) {
-        limpiarFormulario();
-
-        if (tablaVisible) cargarRegistros();
-      }
-    }
-
-    actualizarBotones();
-  </script>
-
-</body>
-</html>
