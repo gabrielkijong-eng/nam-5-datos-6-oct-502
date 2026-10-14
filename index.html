@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Captura de Datos</title>
-  <!-- Fuentes de Google para un aspecto más moderno -->
+  <!-- Google Fonts for modern typography -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -237,6 +237,36 @@
     }
     td button:last-child:hover { background-color: var(--danger-hover); }
 
+    /* Custom Message Modal / Box to avoid standard alerts */
+    #customModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    .modal-content p {
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+    .modal-btn {
+      background-color: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+
     @media (max-width: 600px) {
       .form-grid {
         grid-template-columns: 1fr;
@@ -292,3 +322,271 @@
 
     <p id="estado"></p>
   </div>
+
+  <div id="seccionTabla">
+    <div class="table-header-flex">
+      <h2>Registros</h2>
+      <button type="button" id="btnCerrar">Cerrar tabla</button>
+    </div>
+    
+    <input type="text" id="buscador" placeholder="🔍 Buscar por nombre...">
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Cargo</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Custom Dialog Modal -->
+  <div id="customModal">
+    <div class="modal-content">
+      <p id="modalMessage">Mensaje</p>
+      <button class="modal-btn" onclick="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <script>
+    // URL de la implementación de Apps Script proporcionada
+    var URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzG7OUuyaCmAqz9AN0TuKVBdv0ltqhf6awzIRmA2DDLloz6yTvGytn6GMFWwYUohwI1xw/exec";
+
+    var registros = [];
+    var tablaVisible = false;
+
+    function mostrarMensaje(texto) {
+      document.getElementById("modalMessage").textContent = texto;
+      document.getElementById("customModal").style.display = "flex";
+    }
+
+    function cerrarModal() {
+      document.getElementById("customModal").style.display = "none";
+    }
+
+    // ---------- Enviar datos al script vía POST (manejando CORS redirects de Apps Script) ----------
+    function enviar(datos) {
+      return fetch(URL_SCRIPT, {
+        method: "POST",
+        mode: "no-cors",
+        body: new URLSearchParams(datos)
+      }).then(function () {
+        // Dado que Apps Script con no-cors devuelve un opaco response, simulamos una respuesta exitosa
+        return { ok: true };
+      }).catch(function(err) {
+        return { ok: false, mensaje: err };
+      });
+    }
+
+    // ---------- Botones activos según el estado ----------
+    function actualizarBotones() {
+      var hayRegistro = document.getElementById("id").value !== "";
+
+      document.getElementById("btnRegistrar").disabled = hayRegistro;
+      document.getElementById("btnModificar").disabled = !hayRegistro;
+      document.getElementById("btnEliminar").disabled = !hayRegistro;
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("formulario").reset();
+      document.getElementById("id").value = "";
+      actualizarBotones();
+    }
+
+    // ---------- REGISTRAR ----------
+    document.getElementById("btnRegistrar").onclick = function () {
+      if (!document.getElementById("formulario").reportValidity()) return;
+
+      document.getElementById("estado").textContent = "Guardando...";
+
+      enviar({
+        accion: "guardar",
+        nombre: document.getElementById("nombre").value,
+        edad: document.getElementById("edad").value,
+        cargo: document.getElementById("cargo").value,
+        telefono: document.getElementById("telefono").value,
+        correo: document.getElementById("correo").value
+      }).then(function (respuesta) {
+        terminarAccion(respuesta, "¡Registro guardado!");
+      });
+    };
+
+    // ---------- CONSULTAR ----------
+    document.getElementById("btnConsultar").onclick = function () {
+      document.getElementById("estado").textContent = "Consultando...";
+      tablaVisible = true;
+      document.getElementById("seccionTabla").style.display = "block";
+
+      cargarRegistros(function () {
+        document.getElementById("estado").textContent = "";
+      });
+    };
+
+    function cargarRegistros(alTerminar) {
+      // Usamos JSONP o llamada estándar GET (asegúrate de que doGet devuelva ContentService en JSON)
+      fetch(URL_SCRIPT)
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (datos) {
+          registros = Array.isArray(datos) ? datos : [];
+          mostrarTabla();
+          if (alTerminar) alTerminar();
+        })
+        .catch(function (error) {
+          document.getElementById("estado").textContent = "Error al consultar registros.";
+          if (alTerminar) alTerminar();
+        });
+    }
+
+    function mostrarTabla() {
+      var filtro = document.getElementById("buscador").value.trim().toLowerCase();
+      var tabla = document.getElementById("tabla");
+      tabla.innerHTML = "";
+
+      registros.forEach(function (reg) {
+        var nombreReg = reg.nombre ? String(reg.nombre).toLowerCase() : "";
+        if (filtro && !nombreReg.includes(filtro)) return;
+
+        var tr = document.createElement("tr");
+
+        var fechaFormateada = reg.fecha ? new Date(reg.fecha).toLocaleString() : "";
+        agregarCelda(tr, fechaFormateada);
+        agregarCelda(tr, reg.nombre);
+        agregarCelda(tr, reg.edad);
+        agregarCelda(tr, reg.cargo);
+        agregarCelda(tr, reg.telefono);
+        agregarCelda(tr, reg.correo);
+
+        var td = document.createElement("td");
+
+        var btnModificarFila = document.createElement("button");
+        btnModificarFila.textContent = "Modificar";
+        btnModificarFila.onclick = function () {
+          cargarEnFormulario(reg);
+        };
+
+        var btnEliminarFila = document.createElement("button");
+        btnEliminarFila.textContent = "Eliminar";
+        btnEliminarFila.onclick = function () {
+          eliminar(reg.id);
+        };
+
+        td.appendChild(btnModificarFila);
+        td.appendChild(btnEliminarFila);
+        tr.appendChild(td);
+        tabla.appendChild(tr);
+      });
+    }
+
+    function agregarCelda(fila, texto) {
+      var td = document.createElement("td");
+      td.textContent = texto == null ? "" : texto;
+      fila.appendChild(td);
+    }
+
+    document.getElementById("buscador").oninput = mostrarTabla;
+
+    // ---------- CERRAR TABLA ----------
+    document.getElementById("btnCerrar").onclick = function () {
+      tablaVisible = false;
+      document.getElementById("seccionTabla").style.display = "none";
+      document.getElementById("buscador").value = "";
+      document.getElementById("tabla").innerHTML = "";
+    };
+
+    // ---------- CARGAR REGISTRO EN EL FORMULARIO ----------
+    function cargarEnFormulario(reg) {
+      document.getElementById("id").value = reg.id || "";
+      document.getElementById("nombre").value = reg.nombre || "";
+      document.getElementById("edad").value = reg.edad || "";
+      document.getElementById("cargo").value = reg.cargo || "";
+      document.getElementById("telefono").value = reg.telefono || "";
+      document.getElementById("correo").value = reg.correo || "";
+
+      document.getElementById("estado").textContent = "Modificando registro: cambia los datos y presiona Modificar";
+
+      actualizarBotones();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById("nombre").focus();
+    }
+
+    // ---------- MODIFICAR ----------
+    document.getElementById("btnModificar").onclick = function () {
+      var id = document.getElementById("id").value;
+
+      if (id === "") {
+        mostrarMensaje("Primero elige un registro con el botón 'Modificar' de la tabla.");
+        return;
+      }
+
+      if (!document.getElementById("formulario").reportValidity()) return;
+
+      document.getElementById("estado").textContent = "Modificando...";
+
+      enviar({
+        accion: "editar",
+        id: id,
+        nombre: document.getElementById("nombre").value,
+        edad: document.getElementById("edad").value,
+        cargo: document.getElementById("cargo").value,
+        telefono: document.getElementById("telefono").value,
+        correo: document.getElementById("correo").value
+      }).then(function (respuesta) {
+        terminarAccion(respuesta, "¡Registro modificado!");
+      });
+    };
+
+    // ---------- ELIMINAR ----------
+    document.getElementById("btnEliminar").onclick = function () {
+      var id = document.getElementById("id").value;
+
+      if (id === "") {
+        mostrarMensaje("Primero selecciona un registro para eliminar.");
+        return;
+      }
+
+      eliminar(id);
+    };
+
+    function eliminar(id) {
+      if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+
+      document.getElementById("estado").textContent = "Eliminando...";
+
+      enviar({
+        accion: "eliminar",
+        id: id
+      }).then(function (respuesta) {
+        terminarAccion(respuesta, "Registro eliminado");
+      });
+    }
+
+    // ---------- MENSAJE AL TERMINAR UNA ACCIÓN ----------
+    function terminarAccion(respuesta, mensajeOk) {
+      document.getElementById("estado").textContent = respuesta.ok ? mensajeOk : "Error en la operación";
+
+      if (respuesta.ok) {
+        limpiarFormulario();
+        if (tablaVisible) {
+          setTimeout(function() {
+            cargarRegistros();
+          }, 1000); // Pequeña pausa para dar tiempo a que Apps Script guarde en la hoja
+        }
+      }
+    }
+
+    actualizarBotones();
+  </script>
+
+</body>
+</html>
